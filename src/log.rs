@@ -13,6 +13,8 @@ use std::{
     time::Duration,
 };
 
+
+
 pub(crate) struct HookLogger {
     tx: Arc<Sender<String>>,
     shutdown: Arc<AtomicBool>,
@@ -38,9 +40,10 @@ impl HookLogger {
         Ok(Self { tx: Arc::new(tx), shutdown })
     }
 
-    pub(crate) fn append(&self, ts: &SystemTime) {
-        let t = ts.duration_since(UNIX_EPOCH).unwrap();
-        let s = format!("{:?}", t);
+    pub(crate) fn append(&self) {
+        let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        let s = format!("{:?}", timestamp);
+        
         if let Err(e) = self.tx.send(s) {
             eprintln!("Send error: {e}")
         }
