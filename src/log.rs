@@ -21,7 +21,7 @@ pub(crate) struct HookLogger {
 impl HookLogger {
     pub(crate) fn new(path: String) -> Result<Self> {
         let (tx, rx) = bounded::<String>(1000);
-        let mut storage = File::open(path)?;
+        let mut storage = File::create(path)?;
         let shutdown = Arc::new(AtomicBool::new(true));
         let shutdown_clone = Arc::clone(&shutdown);
 
