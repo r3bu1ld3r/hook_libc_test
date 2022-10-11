@@ -1,7 +1,7 @@
 mod log;
 
 use anyhow::Result;
-use ctor::ctor;
+use ctor::{ctor, dtor};
 use frida_gum::{interceptor::Interceptor, Gum, Module, NativePointer};
 use lazy_static::lazy_static;
 use libc::{c_char, c_int, c_void};
@@ -20,7 +20,10 @@ static mut ORIGINAL_OPEN: OnceCell<LibcOpen> = OnceCell::new();
 //TODO: set errno for correctness?
 unsafe extern "C" fn open_hook(name: *const c_char, flags: c_int) -> c_int {
     LOGGER.get().map(|v| v.append());
-    ORIGINAL_OPEN.get().map(|ptr| ptr(name, flags)).unwrap_or(-1)
+    ORIGINAL_OPEN
+        .get()
+        .map(|ptr| ptr(name, flags))
+        .unwrap_or(-1)
 }
 
 fn set_hook() -> Result<()> {
@@ -57,4 +60,11 @@ fn init() {
         }
         Err(e) => eprintln!("[-] Hook logger creation error: {e}"),
     }
+}
+
+#[dtor]
+fn shutdown() {
+    let ptr = unsafe { ORIGINAL_OPEN.get().unwrap() };
+    let mut interceptor = Interceptor::obtain(&GUM);
+    unsafe { interceptor.revert(NativePointer(std::mem::transmute(ptr))) };
 }
