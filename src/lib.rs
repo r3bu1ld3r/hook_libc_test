@@ -37,7 +37,8 @@ fn set_hooks(mut storage: HookStorage) -> Result<()> {
 #[ctor]
 fn init() {
     let storage = HookStorage::new();
-    match HookLogger::new("./log.txt".to_string()) { //TODO: move this to env
+    match HookLogger::new("./log.txt".to_string()) {
+        //TODO: move this to env
         Ok(logger) => {
             if let Err(_) = LOGGER.set(logger) {
                 eprintln!("[-] Can't initialize global hook logger")
