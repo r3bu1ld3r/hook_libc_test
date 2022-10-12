@@ -17,14 +17,14 @@ impl HookStorage {
         }
     }
 
-    pub fn add(&mut self, name: &'static str, hook_addr: *mut c_void) -> Result<()>{
+    pub fn add(&mut self, name: &'static str, hook_addr: *mut c_void) -> Result<()> {
         let mut engine = Interceptor::obtain(&GUM);
         let origin_ptr = self.install(&mut engine, name, hook_addr)?;
         self.storage.insert(name, origin_ptr);
         Ok(())
     }
-    
-    pub fn get_ptr(&self, name: &str) -> *mut c_void{
+
+    pub fn get_ptr(&self, name: &str) -> *mut c_void {
         self.storage.get(name).unwrap().0
     }
 

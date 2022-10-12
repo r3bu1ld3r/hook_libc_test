@@ -13,7 +13,6 @@ use std::{
     time::Duration,
 };
 
-
 pub(crate) struct HookLogger {
     tx: Arc<Sender<String>>,
     shutdown: Arc<AtomicBool>,
@@ -29,6 +28,7 @@ impl HookLogger {
         thread::spawn(move || {
             while shutdown_clone.load(Ordering::Relaxed) {
                 if let Ok(s) = rx.recv_timeout(Duration::from_millis(100)) {
+                    eprintln!("New string in log: {s}");
                     if let Err(e) = writeln!(&mut storage, "{}", s) {
                         eprintln!("Writer error: {e}");
                     }
@@ -36,13 +36,16 @@ impl HookLogger {
                 sleep(Duration::from_millis(200))
             }
         });
-        Ok(Self { tx: Arc::new(tx), shutdown })
+        Ok(Self {
+            tx: Arc::new(tx),
+            shutdown,
+        })
     }
 
     pub(crate) fn append(&self) {
         let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
         let s = format!("{:?}", timestamp);
-        
+
         if let Err(e) = self.tx.send(s) {
             eprintln!("Send error: {e}")
         }
