@@ -14,7 +14,6 @@ use std::{
 };
 
 
-
 pub(crate) struct HookLogger {
     tx: Arc<Sender<String>>,
     shutdown: Arc<AtomicBool>,
